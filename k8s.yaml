@@ -13,19 +13,6 @@ spec:
     targetPort: 8000
   type: LoadBalancer
 ---
-apiVersion: v1
-data:
-  .dockercfg: eyJhdXRocyI6eyJvc3NkZW1vdjIuYXp1cmVjci5pbyI6eyJ1c2VybmFtZSI6Im9zc2RlbW92MiIsInBhc3N3b3JkIjoiQ2NwMjZ6QlU0NFM1Mno9ZGFZQWk1MU9jbEV1RkJRS2kiLCJlbWFpbCI6InhpYW5neWFuQG1pY3Jvc29mdC5jb20iLCJhdXRoIjoiYjNOelpHVnRiM1l5T2tOamNESTJla0pWTkRSVE5USjZQV1JoV1VGcE5URlBZMnhGZFVaQ1VVdHAifX19
-kind: Secret
-metadata:
-  creationTimestamp: 2017-12-19T19:09:02Z
-  name: regsecret
-  namespace: default
-  resourceVersion: "89522"
-  selfLink: /api/v1/namespaces/default/secrets/regsecret
-  uid: 13152013-e4f0-11e7-909f-0a58ac1f162a
-type: kubernetes.io/dockercfg
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
