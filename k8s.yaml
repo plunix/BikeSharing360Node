@@ -1,0 +1,35 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: bikesharing360
+  labels:
+    app: bikesharing360
+spec:
+  selector:
+    run: bikesharing360
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bikesharing360
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: bikesharing360
+        app: bikesharing360
+    spec:
+      containers:
+      - name: bikesharing360
+        image: ossdemov2.azurecr.io/bikesharing360
+        env:
+        - name: HOST_PLATFORM
+          value: "ACS Kubernetes"
+        ports:
+          - containerPort: 8080
