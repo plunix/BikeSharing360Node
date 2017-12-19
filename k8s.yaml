@@ -29,6 +29,6 @@ spec:
       - name: bikesharing360
         image: ossdemov2.azurecr.io/bikesharing360:6
         ports:
-          - containerPort: 8000
+        - containerPort: 8000
       imagePullSecrets:
       - name: mysecret
