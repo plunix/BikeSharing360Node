@@ -27,10 +27,7 @@ spec:
     spec:
       containers:
       - name: bikesharing360
-        image: ossdemov2.azurecr.io/bikesharing360
-        env:
-        - name: HOST_PLATFORM
-          value: "ACS Kubernetes"
+        image: ossdemov2.azurecr.io/bikesharing360:6
         ports:
           - containerPort: 8000
       imagePullSecrets:
