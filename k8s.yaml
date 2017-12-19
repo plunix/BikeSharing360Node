@@ -9,8 +9,8 @@ spec:
     run: bikesharing360
   ports:
   - protocol: TCP
-    port: 8080
-    targetPort: 8080
+    port: 80
+    targetPort: 8000
   type: LoadBalancer
 ---
 apiVersion: extensions/v1beta1
@@ -32,4 +32,4 @@ spec:
         - name: HOST_PLATFORM
           value: "ACS Kubernetes"
         ports:
-          - containerPort: 8080
+          - containerPort: 8000
