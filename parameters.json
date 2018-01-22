@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminPassword": {
-            "value": ""
+            "value": "YourPassword"
         },
         "adminUserName": {
             "value": "azureuser"
@@ -12,7 +12,7 @@
             "value": "password"
         },
         "dnsPrefix": {
-            "value": "ossdemoxy"
+            "value": "YourDNS"
         },
         "publicIPName": {
             "value": "jenkins-pip"
@@ -21,7 +21,7 @@
             "value": "new"
         },
         "publicIPResourceGroup": {
-            "value": "OssDemoXY"
+            "value": "YourRGName"
         },
         "storageAccountType": {
             "value": "Premium_LRS"
@@ -48,7 +48,7 @@
             "value": "jenkins-vnet"
         },
         "vnetResourceGroup": {
-            "value": "OssDemoXY"
+            "value": "YourRGName"
         },
         "vnetAddressPrefix": {
             "value": "172.18.0.0/16"
