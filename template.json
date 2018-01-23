@@ -292,7 +292,21 @@
                             "protocol": "Tcp",
                             "sourceAddressPrefix": "Internet",
                             "sourcePortRange": "*"
-                        }
+                      },
+ -                    {
+ -                        "name": "custom-rule-8080",
+ -                        "properties": {
+ -                            "access": "Allow",
+ -                            "description": "Allow 8080",
+ -                            "destinationAddressPrefix": "*",
+ -                            "destinationPortRange": "8080",
+ -                            "direction": "Inbound",
+ -                            "priority": 111,
+ -                            "protocol": "Tcp",
+ -                            "sourceAddressPrefix": "Internet",
+ -                            "sourcePortRange": "*"
+ -                        }
+ -                    }
                     }
                 ]
             },
