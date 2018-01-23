@@ -2,14 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "adminPassword": {
-            "value": "YourPassword"
+        "adminSSHPublicKey": {
+            "value": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAowSz3rA/VWdqymz/Eos+/l+RQseXaYcsJxa9NCW07Tu1x9zW+2Gvc1h0ULjlfyOg6jT4v3S8/rdwgHMJtiGfGzjcJlgnA14UOvoXESE3kxzGnT4nvih7O3LuhQrbrX1kxZXAFm15t7ECju3l0vqZnop4RxX5ow9krjEiNuaCDvgsw52q4ZW0XkhEW2msrdvSN4IPE9LX8tbKjfqze8rkbRrZ/ISOTEGs6oJf8L7Y4saI2CNR1nglUiVVZV7DLvdMneXWulA5qAPEHv6Lc9qYRxTPfxaKdwpCy3iwJ5e7yr2V5O3/dpDEFj2GTIjUVH+Wmawvkg6avaLdiANHsN0vuQ=="
         },
         "adminUserName": {
             "value": "azureuser"
         },
         "authenticationType": {
-            "value": "password"
+            "value": "sshPublicKey"
         },
         "dnsPrefix": {
             "value": "YourDNS"
@@ -42,7 +42,7 @@
             "value": "msi"
         },
         "enableCloudAgents": {
-            "value": "no"
+            "value": "aci"
         },
         "vnetName": {
             "value": "jenkins-vnet"
