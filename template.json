@@ -295,7 +295,7 @@
                         }
                     },
                     {
-                        "name": "custom-rule",
+                        "name": "custom-rule-8080",
                         "properties": {
                             "access": "Allow",
                             "description": "Allow 8080",
@@ -303,6 +303,20 @@
                             "destinationPortRange": "8080",
                             "direction": "Inbound",
                             "priority": 111,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "Internet",
+                            "sourcePortRange": "*"
+                        }
+                    },
+                    {
+                        "name": "custom-rule-12345",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "Allow 12345",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "12345",
+                            "direction": "Inbound",
+                            "priority": 112,
                             "protocol": "Tcp",
                             "sourceAddressPrefix": "Internet",
                             "sourcePortRange": "*"
