@@ -305,8 +305,7 @@
  -                            "protocol": "Tcp",
  -                            "sourceAddressPrefix": "Internet",
  -                            "sourcePortRange": "*"
- -                        }
- -                    }
+ -                      }
                     }
                 ]
             },
