@@ -19,6 +19,9 @@ Arguments
   --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
   --resource_group|-rg                : the resource group name.
   --location|-lo                      : the resource group location.
+  --group_suffix|-gs                  : the group suffix.
+  --acr_username|-au                  : the acr user name.
+  --acr_password|-ap                  : the acr password.
 EOF
 }
 
@@ -121,6 +124,18 @@ do
       location="$1"
       shift
       ;;
+    --group_suffix|-gs)
+      group_suffix="$1"
+      shift
+      ;;
+    --acr_username|-au)
+      acr_username="$1"
+      shift
+      ;;
+    --acr_password|-ap)
+      acr_password="$1"
+      shift
+      ;;
     --help|-help|-h)
       print_usage
       exit 13
@@ -138,7 +153,7 @@ if [[ "$jenkins_release_type" != "LTS" ]] && [[ "$jenkins_release_type" != "week
   exit 1
 fi
 
-jenkins_url="http://${jenkins_fqdn}/"
+jenkins_url="http://${jenkins_fqdn}:8080/"
 
 jenkins_auth_matrix_conf=$(cat <<EOF
 <authorizationStrategy class="hudson.security.ProjectMatrixAuthorizationStrategy">
@@ -186,7 +201,7 @@ jenkins_location_conf=$(cat <<EOF
 <?xml version='1.0' encoding='UTF-8'?>
 <jenkins.model.JenkinsLocationConfiguration>
     <adminAddress>address not configured yet &lt;nobody@nowhere&gt;</adminAddress>
-    <jenkinsUrl>${jenkins_url}:8080</jenkinsUrl>
+    <jenkinsUrl>${jenkins_url}</jenkinsUrl>
 </jenkins.model.JenkinsLocationConfiguration>
 EOF
 )
@@ -419,6 +434,58 @@ aci_agent_conf=$(cat <<EOF
 EOF
 )
 
+aks_agent_conf=$(cat <<EOF
+  <clouds>
+    <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.4.1">
+      <name>kubernetes</name>
+      <resourceGroup>OssDemoJenkinsAgents${group_suffix}</resourceGroup>
+      <serviceName>jenkinsaks | AKS</serviceName>
+      <namespace>default</namespace>
+      <acsCredentialsId></acsCredentialsId>
+      <azureCredentialsId>azure_service_principal</azureCredentialsId>
+      <startupTimeout>10</startupTimeout>
+      <templates>
+        <com.microsoft.jenkins.containeragents.PodTemplate>
+          <name></name>
+          <image>microsoft/java-on-azure-jenkins-slave:0.1</image>
+          <command></command>
+          <args>-url ${rootUrl} ${secret} ${nodeName}</args>
+          <label></label>
+          <rootFs>/home/jenkins</rootFs>
+          <launchMethodType>jnlp</launchMethodType>
+          <retentionStrategy class="com.microsoft.jenkins.containeragents.strategy.ContainerOnceRetentionStrategy">
+            <idleMinutes>10</idleMinutes>
+          </retentionStrategy>
+          <privileged>false</privileged>
+          <specifyNode></specifyNode>
+          <requestCpu></requestCpu>
+          <limitCpu></limitCpu>
+          <requestMemory></requestMemory>
+          <limitMemory></limitMemory>
+          <envVars/>
+          <volumes>
+            <com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+              <mountPath>/etc/kubernetes</mountPath>
+              <hostPath>/etc/kubernetes</hostPath>
+            </com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+            <com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+              <mountPath>/var/run/docker.sock</mountPath>
+              <hostPath>/var/run/docker.sock</hostPath>
+            </com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+            <com.microsoft.jenkins.containeragents.volumes.SecretVolume>
+              <mountPath>/var/lib/jenkins/.kube</mountPath>
+              <secretName>config</secretName>
+            </com.microsoft.jenkins.containeragents.volumes.SecretVolume>
+          </volumes>
+          <imagePullSecrets/>
+          <privateRegistryCredentials/>
+        </com.microsoft.jenkins.containeragents.PodTemplate>
+      </templates>
+    </com.microsoft.jenkins.containeragents.KubernetesCloud>
+  </clouds>
+EOF
+)
+
 agent_admin_password=$(head /dev/urandom | tr -dc A-Z | head -c 4)$(head /dev/urandom | tr -dc a-z | head -c 4)$(head /dev/urandom | tr -dc 0-9 | head -c 4)'!@'
 agent_admin_cred=$(cat <<EOF
 <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
@@ -441,6 +508,10 @@ if [ "${cloud_agents}" == 'vm' ]; then
 elif [ "${cloud_agents}" == 'aci' ]; then
   inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
   final_jenkins_config=${inter_jenkins_config//'{clouds}'/${aci_agent_conf}}
+  echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
+elif [ "${cloud_agents}" == 'aks' ]; then
+  inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
+  final_jenkins_config=${inter_jenkins_config//'{clouds}'/${aks_agent_conf}}
   echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 fi
 
