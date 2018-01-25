@@ -33,19 +33,22 @@
             "value": "Standard_DS2_v2"
         },
         "location": {
-            "value": "centralus"
+            "value": "eastus"
+        },
+        "groupsuffix": {
+            "value": "YourGroupSuffix"
+        },
+        "acrusername": {
+            "value": "YourACRName"
+        },
+        "acrpassword": {
+            "value": "YourACRPassword"
         },
         "jenkinsReleaseType": {
             "value": "LTS"
         },
         "spType": {
-            "value": "manual"
-        },
-        "spId": {
-            "value": "YourSPId"
-        },
-        "spSecret": {
-            "value": "YourSPSecret"
+            "value": "msi"
         },
         "enableCloudAgents": {
             "value": "no"
@@ -57,7 +60,7 @@
             "value": "YourRGName"
         },
         "vnetAddressPrefix": {
-            "value": "172.19.0.0/16"
+            "value": "172.18.0.0/16"
         },
         "vnetNewOrExisting": {
             "value": "new"
@@ -66,7 +69,7 @@
             "value": "jenkins"
         },
         "subnetAddressPrefix": {
-            "value": "172.19.0.0/24"
+            "value": "172.18.0.0/24"
         }
     }
 }
