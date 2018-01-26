@@ -35,13 +35,13 @@
         "location": {
             "value": "eastus"
         },
-        "groupsuffix": {
+        "groupSuffix": {
             "value": "YourGroupSuffix"
         },
-        "acrusername": {
+        "acrUserName": {
             "value": "YourACRName"
         },
-        "acrpassword": {
+        "acrPassword": {
             "value": "YourACRPassword"
         },
         "jenkinsReleaseType": {
