@@ -302,6 +302,20 @@
                         }
                     },
                     {
+                        "name": "jenkins-rule",
+                        "properties": {
+                            "access": "Allow",
+                            "description": "Allow HTTP",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "8080",
+                            "direction": "Inbound",
+                            "priority": 111,
+                            "protocol": "Tcp",
+                            "sourceAddressPrefix": "Internet",
+                            "sourcePortRange": "*"
+                        }
+                    },
+                    {
                         "name": "jnlp-rule",
                         "properties": {
                             "access": "Allow",
