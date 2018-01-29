@@ -493,6 +493,10 @@ elif [ "${cloud_agents}" == 'aci' ]; then
   inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
   final_jenkins_config=${inter_jenkins_config//'{clouds}'/${aci_agent_conf}}
   echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
+elif [ "${cloud_agents}" == 'aks' ]; then
+  inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
+  final_jenkins_config=${inter_jenkins_config//'{clouds}'/${aks_agent_conf}}
+  echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 fi
 
 run_util_script "scripts/run-cli-command.sh" -c "reload-configuration"
