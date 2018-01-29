@@ -19,6 +19,9 @@ Arguments
   --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
   --resource_group|-rg                : the resource group name.
   --location|-lo                      : the resource group location.
+  --group_suffix|-gs                  : the group suffix.
+  --acr_username|-au                  : the acr user name.
+  --acr_password|-ap  				  : the acr password.
 EOF
 }
 
@@ -118,6 +121,18 @@ do
       shift
       ;;
     --location|-lo)
+      location="$1"
+      shift
+      ;;
+    --group_suffix|-gs)
+      location="$1"
+      shift
+      ;;
+    --acr_username|-au)
+      location="$1"
+      shift
+      ;;
+    --acr_password|-ap)
       location="$1"
       shift
       ;;
