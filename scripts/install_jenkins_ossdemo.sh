@@ -438,7 +438,7 @@ aks_agent_conf=$(cat <<EOF
   <clouds>
     <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
       <name>aks</name>
-      <resourceGroup>OssDemoJenkinsAgents${group_suffix}</resourceGroup>
+      <resourceGroup>OssDemoJenkinsAgents\${group_suffix}</resourceGroup>
       <serviceName>jenkinsaks | AKS</serviceName>
       <namespace>default</namespace>
       <acsCredentialsId></acsCredentialsId>
