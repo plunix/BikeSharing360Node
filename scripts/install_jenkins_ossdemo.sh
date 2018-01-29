@@ -419,6 +419,57 @@ aci_agent_conf=$(cat <<EOF
 EOF
 )
 
+aks_agent_conf=$(cat <<EOF
+  <clouds>
+    <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
+      <name>aks</name>
+      <resourceGroup>OssDemoJenkinsAgentsV3</resourceGroup>
+      <serviceName>jenkinsaks | AKS</serviceName>
+      <namespace>default</namespace>
+      <acsCredentialsId></acsCredentialsId>
+      <azureCredentialsId>azure_service_principal</azureCredentialsId>
+      <startupTimeout>10</startupTimeout>
+      <templates>
+        <com.microsoft.jenkins.containeragents.PodTemplate>
+          <name>jnlp</name>
+          <image>microsoft/java-on-azure-jenkins-slave:0.1</image>
+          <command></command>
+          <args>-url ${rootUrl} ${secret} ${nodeName}</args>
+          <label>jnlp</label>
+          <rootFs>/home/jenkins</rootFs>
+          <retentionStrategy class="com.microsoft.jenkins.containeragents.strategy.ContainerOnceRetentionStrategy">
+            <idleMinutes>10</idleMinutes>
+          </retentionStrategy>
+          <privileged>false</privileged>
+          <specifyNode></specifyNode>
+          <requestCpu></requestCpu>
+          <limitCpu></limitCpu>
+          <requestMemory></requestMemory>
+          <limitMemory></limitMemory>
+          <envVars/>
+          <volumes>
+            <com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+              <mountPath>/etc/kubernetes</mountPath>
+              <hostPath>/etc/kubernetes</hostPath>
+            </com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+            <com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+              <mountPath>/var/run/docker.sock</mountPath>
+              <hostPath>/var/run/docker.sock</hostPath>
+            </com.microsoft.jenkins.containeragents.volumes.HostPathVolume>
+            <com.microsoft.jenkins.containeragents.volumes.SecretVolume>
+              <mountPath>/var/lib/jenkins/.kube</mountPath>
+              <secretName>config</secretName>
+            </com.microsoft.jenkins.containeragents.volumes.SecretVolume>
+          </volumes>
+          <imagePullSecrets/>
+          <privateRegistryCredentials/>
+        </com.microsoft.jenkins.containeragents.PodTemplate>
+      </templates>
+    </com.microsoft.jenkins.containeragents.KubernetesCloud>
+  </clouds>
+EOF
+)
+
 agent_admin_password=$(head /dev/urandom | tr -dc A-Z | head -c 4)$(head /dev/urandom | tr -dc a-z | head -c 4)$(head /dev/urandom | tr -dc 0-9 | head -c 4)'!@'
 agent_admin_cred=$(cat <<EOF
 <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
