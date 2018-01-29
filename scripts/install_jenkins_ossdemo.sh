@@ -7,7 +7,6 @@ Command
   $0
 Arguments
   --jenkins_fqdn|-jf       [Required] : Jenkins FQDN
-  --vm_private_ip|-pi                 : The VM private ip used to configure Jenkins URL. If missing, jenkins_fqdn will be used instead
   --jenkins_release_type|-jrt         : The Jenkins release type (LTS or weekly or verified). By default it's set to LTS
   --jenkins_version_location|-jvl     : Url used to specify the version of Jenkins.
   --service_principal_type|-sp        : The type of service principal: MSI or manual.
@@ -36,7 +35,7 @@ function throw_if_empty() {
 function run_util_script() {
   local script_path="$1"
   shift
-  curl --silent "${artifacts_location}${script_path}${artifacts_location_sas_token}" | sudo bash -s -- "$@"
+  curl --silent "${artifacts_location}/${script_path}${artifacts_location_sas_token}" | sudo bash -s -- "$@"
   local return_value=$?
   if [ $return_value -ne 0 ]; then
     >&2 echo "Failed while executing script '$script_path'."
@@ -59,8 +58,9 @@ function retry_until_successful {
 }
 
 #defaults
-artifacts_location="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
-jenkins_version_location="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/jenkins/jenkins-verified-ver"
+artifacts_location="https://raw.githubusercontent.com/Azure/jenkins/master/solution_template"
+jenkins_version_location="https://raw.githubusercontent.com/Azure/jenkins/master/jenkins-verified-ver"
+jenkins_fallback_version="2.73.3"
 azure_web_page_location="/usr/share/nginx/azure"
 jenkins_release_type="LTS"
 
@@ -71,10 +71,6 @@ do
   case $key in
     --jenkins_fqdn|-jf)
       jenkins_fqdn="$1"
-      shift
-      ;;
-    --vm_private_ip|-pi)
-      vm_private_ip="$1"
       shift
       ;;
     --jenkins_release_type|-jrt)
@@ -142,13 +138,7 @@ if [[ "$jenkins_release_type" != "LTS" ]] && [[ "$jenkins_release_type" != "week
   exit 1
 fi
 
-if [ -z "$vm_private_ip" ]; then
-    #use port 80 for public fqdn
-    jenkins_url="http://${jenkins_fqdn}:8080/"
-else
-    #use port 8080 for internal
-    jenkins_url="http://${vm_private_ip}:8080/"
-fi
+jenkins_url="http://${jenkins_fqdn}:8080/"
 
 jenkins_auth_matrix_conf=$(cat <<EOF
 <authorizationStrategy class="hudson.security.ProjectMatrixAuthorizationStrategy">
@@ -252,8 +242,8 @@ fi
 
 sudo add-apt-repository ppa:openjdk-r/ppa --yes
 
-echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
-sudo apt-key adv --keyserver packages.microsoft.com --recv-keys 417A0893
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ wheezy main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+sudo apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893
 sudo apt-get install apt-transport-https
 sudo apt-get update --yes
 
@@ -263,6 +253,9 @@ sudo apt-get install openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk --yes
 #install jenkins
 if [[ ${jenkins_release_type} == 'verified' ]]; then
   jenkins_version=$(curl --silent "${jenkins_version_location}")
+  if [ -z "$jenkins_version" ]; then
+    jenkins_version=${jenkins_fallback_version}
+  fi
   deb_file=jenkins_${jenkins_version}_all.deb
   wget -q "https://pkg.jenkins.io/debian-stable/binary/${deb_file}"
   if [[ -f ${deb_file} ]]; then
@@ -277,13 +270,14 @@ else
   sudo apt-get install jenkins --yes # sometime the first apt-get install jenkins command fails, so we try it twice
 fi
 
+# wait until Jenkins is started and running
 retry_until_successful sudo test -f /var/lib/jenkins/secrets/initialAdminPassword
-retry_until_successful run_util_script "jenkins/run-cli-command.sh" -c "version"
+retry_until_successful run_util_script "scripts/run-cli-command.sh" -c "version"
 
 #We need to install workflow-aggregator so all the options in the auth matrix are valid
 plugins=(azure-vm-agents windows-azure-storage matrix-auth workflow-aggregator azure-app-service tfs azure-acs azure-container-agents blueocean)
 for plugin in "${plugins[@]}"; do
-  run_util_script "jenkins/run-cli-command.sh" -c "install-plugin $plugin -deploy"
+  run_util_script "scripts/run-cli-command.sh" -c "install-plugin $plugin -deploy"
 done
 
 #allow anonymous read access
@@ -337,17 +331,16 @@ sp_cred=$(cat <<EOF
 </com.microsoft.azure.util.AzureCredentials>
 EOF
 )
-
-retry_until_successful run_util_script "jenkins/run-cli-command.sh" -c "version"
-
 if [ "${service_principal_type}" == 'msi' ]; then
   echo "${msi_cred}" > msi_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif msi_cred.xml
+  run_util_script "scripts/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif msi_cred.xml
   rm msi_cred.xml
-else
+elif [ "${service_principal_type}" == 'manual' ]; then
   echo "${sp_cred}" > sp_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif sp_cred.xml
+  run_util_script "scripts/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif sp_cred.xml
   rm sp_cred.xml
+elif [ "${service_principal_type}" == 'off' ]; then
+  cloud_agents="no"
 fi
 
 #add cloud agents
@@ -410,6 +403,7 @@ aci_agent_conf=$(cat <<EOF
     <templates>
       <com.microsoft.jenkins.containeragents.aci.AciContainerTemplate>
         <name>aciagents</name>
+        <label>linux</label>
         <image>jenkinsci/jnlp-slave</image>
         <osType>Linux</osType>
         <command>jenkins-slave -url \${rootUrl} \${secret} \${nodeName}</command>
@@ -439,7 +433,7 @@ EOF
 
 if [ "${cloud_agents}" == 'vm' ]; then
   echo "${agent_admin_cred}" > agent_admin_cred.xml
-  run_util_script "jenkins/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif agent_admin_cred.xml
+  run_util_script "scripts/run-cli-command.sh" -c "create-credentials-by-xml system::system::jenkins _" -cif agent_admin_cred.xml
   rm agent_admin_cred.xml
   inter_jenkins_config=$(sed -zr -e"s|<clouds/>|{clouds}|" /var/lib/jenkins/config.xml)
   final_jenkins_config=${inter_jenkins_config//'{clouds}'/${vm_agent_conf}}
@@ -450,7 +444,7 @@ elif [ "${cloud_agents}" == 'aci' ]; then
   echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 fi
 
-run_util_script "jenkins/run-cli-command.sh" -c "reload-configuration"
+run_util_script "scripts/run-cli-command.sh" -c "reload-configuration"
 
 
 #install nginx
@@ -463,7 +457,7 @@ echo "${nginx_reverse_proxy_conf}" | sudo tee /etc/nginx/sites-enabled/default >
 sudo sed -i "s|.*server_tokens.*|server_tokens off;|" /etc/nginx/nginx.conf
 
 #install jenkins-on-azure web page
-run_util_script "jenkins/jenkins-on-azure/install-web-page.sh" -u "${jenkins_fqdn}"  -l "${azure_web_page_location}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
+run_util_script "scripts/install-web-page.sh" -u "${jenkins_fqdn}"  -l "${azure_web_page_location}" -al "${artifacts_location}" -st "${artifacts_location_sas_token}"
 
 #restart nginx
 sudo service nginx restart
