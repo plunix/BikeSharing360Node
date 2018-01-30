@@ -539,7 +539,7 @@ bikesharing360job=$(cat <<EOF
         <hudson.model.StringParameterDefinition>
           <name>registry_url</name>
           <description>Container Registry URL</description>
-          <defaultValue>ossdemov3.azurecr.io</defaultValue>
+          <defaultValue>${acr_username}.azurecr.io</defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
@@ -559,7 +559,7 @@ bikesharing360job=$(cat <<EOF
       git branch: 'master', url: params.git_repo
     }
     stage('Build and push Docker image') {
-      sh(script: "docker login \${registry_url} -u ossdemov3 -p r477f=BYXMfb7yPeRZ8taOL3VqVMAkCv", returnStdout: true)
+      sh(script: "docker login \${registry_url} -u ${acr_username} -p ${acr_password}", returnStdout: true)
       sh(script: "docker build -t \${registry_url}/\${docker_repository}:\${BUILD_NUMBER} .", returnStdout: true)
       sh(script: "docker push \${registry_url}/\${docker_repository}:\${BUILD_NUMBER}", returnStdout: true)
     }
@@ -587,8 +587,7 @@ EOF
 
 echo "${bikesharing360job}" > /var/lib/jenkins/bikesharing360job.xml
 run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
-#rm bikesharing360job.xml
-#run_util_script "scripts/run-cli-command.sh" -c "restart"
+rm bikesharing360job.xml
 
 #install nginx
 sudo apt-get install nginx --yes
