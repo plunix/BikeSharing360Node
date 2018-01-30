@@ -516,6 +516,79 @@ fi
 
 run_util_script "scripts/run-cli-command.sh" -c "reload-configuration"
 
+#add job
+bikesharing360job=$(cat <<EOF
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.17">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>git_repo</name>
+          <description>Git repro</description>
+          <defaultValue>https://github.com/xiangyan99/bikesharing360node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>docker_repository</name>
+          <description>The docker repository</description>
+          <defaultValue>bikesharing360</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>registry_url</name>
+          <description>Container Registry URL</description>
+          <defaultValue>ossdemov3.azurecr.io</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <hudson.triggers.SCMTrigger>
+          <spec>* * * * *</spec>
+          <ignorePostCommitHooks>false</ignorePostCommitHooks>
+        </hudson.triggers.SCMTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.43">
+    <script>node {
+    def built_img = &apos;&apos;
+    stage(&apos;Checkout git repo&apos;) {
+      git branch: &apos;master&apos;, url: params.git_repo
+    }
+    stage(&apos;Build and push Docker image&apos;) {
+      sh(script: &quot;docker login \${registry_url} -u ossdemov3 -p r477f=BYXMfb7yPeRZ8taOL3VqVMAkCv&quot;, returnStdout: true)
+      sh(script: &quot;docker build -t \${registry_url}/\${docker_repository}:\${BUILD_NUMBER} .&quot;, returnStdout: true)
+      sh(script: &quot;docker push \${registry_url}/\${docker_repository}:\${BUILD_NUMBER}&quot;, returnStdout: true)
+    }
+    stage(&apos;Unit Tests&apos;) {
+      sh &apos;echo test&apos;
+    }
+    stage(&apos;Browser Tests&apos;){
+        parallel(
+            &quot;Edge&quot;:{sh &apos;echo test&apos;},
+            &quot;Firefox&quot;:{sh &apos;echo test&apos;},
+            &quot;Chrome&quot;:{sh &apos;echo test&apos;}
+            )
+    }
+    stage(&apos;Deploy into k8s&apos;) {
+      sh(script: &quot;kubectl set image deployment/bikesharing360 bikesharing360=\${registry_url}/\${docker_repository}:\${BUILD_NUMBER} --kubeconfig /var/lib/jenkins/.kube/config&quot;, returnStdout: true)
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
+EOF
+)
+
+echo "${bikesharing360job}" > bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "create-job " -cif bikesharing360job.xml
+rm bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "restart"
 
 #install nginx
 sudo apt-get install nginx --yes
