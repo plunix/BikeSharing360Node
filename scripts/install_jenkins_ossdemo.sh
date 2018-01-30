@@ -554,27 +554,27 @@ bikesharing360job=$(cat <<EOF
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.43">
     <script>node {
-    def built_img = &apos;&apos;
-    stage(&apos;Checkout git repo&apos;) {
-      git branch: &apos;master&apos;, url: params.git_repo
+    def built_img = '';
+    stage('Checkout git repo') {
+      git branch: 'master', url: params.git_repo
     }
-    stage(&apos;Build and push Docker image&apos;) {
-      sh(script: &quot;docker login \${registry_url} -u ossdemov3 -p r477f=BYXMfb7yPeRZ8taOL3VqVMAkCv&quot;, returnStdout: true)
-      sh(script: &quot;docker build -t \${registry_url}/\${docker_repository}:\${BUILD_NUMBER} .&quot;, returnStdout: true)
-      sh(script: &quot;docker push \${registry_url}/\${docker_repository}:\${BUILD_NUMBER}&quot;, returnStdout: true)
+    stage('Build and push Docker image') {
+      sh(script: "docker login \${registry_url} -u ossdemov3 -p r477f=BYXMfb7yPeRZ8taOL3VqVMAkCv", returnStdout: true)
+      sh(script: "docker build -t \${registry_url}/\${docker_repository}:\${BUILD_NUMBER} .", returnStdout: true)
+      sh(script: "docker push \${registry_url}/\${docker_repository}:\${BUILD_NUMBER}", returnStdout: true)
     }
-    stage(&apos;Unit Tests&apos;) {
-      sh &apos;echo test&apos;
+    stage('Unit Tests') {
+      sh 'echo test'
     }
-    stage(&apos;Browser Tests&apos;){
+    stage('Browser Tests'){
         parallel(
-            &quot;Edge&quot;:{sh &apos;echo test&apos;},
-            &quot;Firefox&quot;:{sh &apos;echo test&apos;},
-            &quot;Chrome&quot;:{sh &apos;echo test&apos;}
+            "Edge":{sh 'echo test'},
+            "Firefox":{sh 'echo test'},
+            "Chrome":{sh 'echo test'}
             )
     }
-    stage(&apos;Deploy into k8s&apos;) {
-      sh(script: &quot;kubectl set image deployment/bikesharing360 bikesharing360=\${registry_url}/\${docker_repository}:\${BUILD_NUMBER} --kubeconfig /var/lib/jenkins/.kube/config&quot;, returnStdout: true)
+    stage('Deploy into k8s') {
+      sh(script: "kubectl set image deployment/bikesharing360 bikesharing360=\${registry_url}/\${docker_repository}:\${BUILD_NUMBER} --kubeconfig /var/lib/jenkins/.kube/config", returnStdout: true)
     }
 }</script>
     <sandbox>true</sandbox>
