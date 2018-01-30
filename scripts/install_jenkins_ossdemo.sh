@@ -586,7 +586,7 @@ EOF
 )
 
 echo "${bikesharing360job}" > /var/lib/jenkins/bikesharing360job.xml
-#run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
 #rm bikesharing360job.xml
 #run_util_script "scripts/run-cli-command.sh" -c "restart"
 
