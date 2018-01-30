@@ -215,6 +215,8 @@ EOF
 
 jenkins_agent_port="<slaveAgentPort>5378</slaveAgentPort>"
 
+jenkins_num_executors="<numExecutors>0</numExecutors>"
+
 nginx_reverse_proxy_conf=$(cat <<EOF
 server {
     listen 80;
@@ -312,6 +314,11 @@ echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/nul
 #Open a fixed port for JNLP
 inter_jenkins_config=$(sed -zr -e"s|<slaveAgentPort.*</slaveAgentPort>|{slave-agent-port}|" /var/lib/jenkins/config.xml)
 final_jenkins_config=${inter_jenkins_config//'{slave-agent-port}'/${jenkins_agent_port}}
+echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
+
+#Update num of Executors
+inter_jenkins_config=$(sed -zr -e"s|<numExecutors.*</numExecutors>|{number-Executors}|" /var/lib/jenkins/config.xml)
+final_jenkins_config=${inter_jenkins_config//'{number-Executors}'/${jenkins_num_executors}}
 echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 
 #restart jenkins
