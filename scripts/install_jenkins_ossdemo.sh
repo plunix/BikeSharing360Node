@@ -585,10 +585,10 @@ bikesharing360job=$(cat <<EOF
 EOF
 )
 
-echo "${bikesharing360job}" > bikesharing360job.xml
-#run_util_script "scripts/run-cli-command.sh" -c "create-job " -cif bikesharing360job.xml
-#rm bikesharing360job.xml
-#run_util_script "scripts/run-cli-command.sh" -c "restart"
+echo "${bikesharing360job}" > /var/lib/jenkins/bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "create-job " -cif /var/lib/jenkins/bikesharing360job.xml
+rm bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "restart"
 
 #install nginx
 sudo apt-get install nginx --yes
