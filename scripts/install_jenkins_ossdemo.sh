@@ -153,7 +153,7 @@ if [[ "$jenkins_release_type" != "LTS" ]] && [[ "$jenkins_release_type" != "week
   exit 1
 fi
 
-jenkins_url="http://${group_suffix}:8080/"
+jenkins_url="http://${jenkins_fqdn}:8080/"
 
 jenkins_auth_matrix_conf=$(cat <<EOF
 <authorizationStrategy class="hudson.security.ProjectMatrixAuthorizationStrategy">
@@ -438,7 +438,7 @@ aks_agent_conf=$(cat <<EOF
   <clouds>
     <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
       <name>aks</name>
-      <resourceGroup>OssDemoJenkinsAgents\${group_suffix}</resourceGroup>
+      <resourceGroup>OssDemoJenkinsAgents${group_suffix}</resourceGroup>
       <serviceName>jenkinsaks | AKS</serviceName>
       <namespace>default</namespace>
       <acsCredentialsId></acsCredentialsId>
