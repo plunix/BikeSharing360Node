@@ -48,7 +48,7 @@
             "value": "LTS"
         },
         "spType": {
-            "value": "manual"
+            "value": "MSI"
         },
         "enableCloudAgents": {
             "value": "aks"
