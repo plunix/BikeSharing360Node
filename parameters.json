@@ -35,23 +35,23 @@
         "location": {
             "value": "eastus"
         },
-        "groupSuffix": {
-            "value": "YourGroupSuffix"
+        "agentgroup": {
+            "value": "YourAgentGroup"
         },
-        "acrUserName": {
+        "acrusername": {
             "value": "YourACRName"
         },
-        "acrPassword": {
+        "acrpassword": {
             "value": "YourACRPassword"
         },
         "jenkinsReleaseType": {
             "value": "LTS"
         },
         "spType": {
-            "value": "manual"
+            "value": "msi"
         },
         "enableCloudAgents": {
-            "value": "aks"
+            "value": "no"
         },
         "vnetName": {
             "value": "jenkins-vnet"
