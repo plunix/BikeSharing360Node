@@ -112,21 +112,21 @@
             },
             "type": "string"
         },
-        "agentgroup": {
+        "agentGroup": {
             "defaultValue": "",
             "metadata": {
                 "description": "The Group Suffix"
             },
             "type": "string"
         },
-        "acrusername": {
+        "acrUsername": {
             "defaultValue": "",
             "metadata": {
                 "description": "The ACR Username"
             },
             "type": "string"
         },
-        "acrpassword": {
+        "acrPassword": {
             "defaultValue": "",
             "metadata": {
                 "description": "The ACR Password"
