@@ -51,7 +51,7 @@
             "value": "msi"
         },
         "enableCloudAgents": {
-            "value": "no"
+            "value": "aks"
         },
         "vnetName": {
             "value": "jenkins-vnet"
