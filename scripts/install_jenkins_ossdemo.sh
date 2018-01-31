@@ -19,7 +19,7 @@ Arguments
   --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
   --resource_group|-rg                : the resource group name.
   --location|-lo                      : the resource group location.
-  --group_suffix|-gs                  : the group suffix.
+  --agent_group|-ag                   : the group suffix.
   --acr_username|-au                  : the acr user name.
   --acr_password|-ap  				  : the acr password.
 EOF
@@ -124,8 +124,8 @@ do
       location="$1"
       shift
       ;;
-    --group_suffix|-gs)
-      group_suffix="$1"
+    --agent_group|-ag)
+      agent_group="$1"
       shift
       ;;
     --acr_username|-au)
@@ -445,7 +445,7 @@ aks_agent_conf=$(cat <<EOF
   <clouds>
     <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
       <name>aks</name>
-      <resourceGroup>OssDemoJenkinsAgents${group_suffix}</resourceGroup>
+      <resourceGroup>${agent_group}</resourceGroup>
       <serviceName>jenkinsaks | AKS</serviceName>
       <namespace>default</namespace>
       <acsCredentialsId></acsCredentialsId>
