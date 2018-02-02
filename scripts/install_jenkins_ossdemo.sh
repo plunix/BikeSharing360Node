@@ -19,7 +19,6 @@ Arguments
   --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
   --resource_group|-rg                : the resource group name.
   --location|-lo                      : the resource group location.
-  --agent_group|-ag                   : the group suffix.
   --acr_username|-au                  : the acr user name.
   --acr_password|-ap  				  : the acr password.
 EOF
@@ -122,10 +121,6 @@ do
       ;;
     --location|-lo)
       location="$1"
-      shift
-      ;;
-    --agent_group|-ag)
-      agent_group="$1"
       shift
       ;;
     --acr_username|-au)
@@ -445,7 +440,7 @@ aks_agent_conf=$(cat <<EOF
   <clouds>
     <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
       <name>aks</name>
-      <resourceGroup>${agent_group}</resourceGroup>
+      <resourceGroup>${resource_group}</resourceGroup>
       <serviceName>jenkinsaks | AKS</serviceName>
       <namespace>default</namespace>
       <acsCredentialsId></acsCredentialsId>
@@ -593,8 +588,8 @@ EOF
 )
 
 echo "${bikesharing360job}" > /var/lib/jenkins/bikesharing360job.xml
-#run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
-#rm bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
+rm bikesharing360job.xml
 
 #install nginx
 sudo apt-get install nginx --yes
