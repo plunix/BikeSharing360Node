@@ -451,7 +451,7 @@ aks_agent_conf=$(cat <<EOF
           <name>jnlp</name>
           <image>microsoft/java-on-azure-jenkins-slave:0.1</image>
           <command></command>
-          <args>-url ${rootUrl} ${secret} ${nodeName}</args>
+          <args>-url \${rootUrl} \${secret} \${nodeName}</args>
           <label>jnlp</label>
           <rootFs>/home/jenkins</rootFs>
           <retentionStrategy class="com.microsoft.jenkins.containeragents.strategy.ContainerOnceRetentionStrategy">
