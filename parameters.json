@@ -47,6 +47,12 @@
         "spType": {
             "value": "msi"
         },
+        "spId": {
+            "value": "YourSPId"
+        },
+        "spSecret": {
+            "value": "YourSPSecret"
+        },
         "enableCloudAgents": {
             "value": "aks"
         },
