@@ -33,7 +33,10 @@
             "value": "Standard_DS2_v2"
         },
         "location": {
-            "value": "centralus"
+            "value": "eastus"
+        },
+        "agentGroup": {
+            "value": "YourAgentGroup"
         },
         "acrUsername": {
             "value": "YourACRName"
@@ -45,13 +48,7 @@
             "value": "LTS"
         },
         "spType": {
-            "value": "msi"
-        },
-        "spId": {
-            "value": "YourSPId"
-        },
-        "spSecret": {
-            "value": "YourSPSecret"
+            "value": "manual"
         },
         "enableCloudAgents": {
             "value": "aks"
