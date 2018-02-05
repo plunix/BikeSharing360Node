@@ -5,7 +5,7 @@
 -- Install Azure cli
 -- Install docker
 
-##Deployment script
+## Deployment script
 group_suffix=V7
 
 targetlocation=centralus
