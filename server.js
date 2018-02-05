@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname,'public')));
 
 var items = [
 	"Sign In",
-	"How it Works",
+	"How it Work",
 	"Intelligent App",
 	"Cities",
 	"Our clients"
