@@ -1,9 +1,9 @@
 # BikeSharing360Node
 
 ## Prerequisites
--- Install kubectl 
--- Install Azure cli 
--- Install docker 
+-- Install kubectl  
+-- Install Azure cli  
+-- Install docker  
 
 ## Deployment script
 group_suffix=V7 
