@@ -2,7 +2,9 @@
 
 ## Prerequisites
 -- Install kubectl
+
 -- Install Azure cli
+
 -- Install docker
 
 ## Deployment script
