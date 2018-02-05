@@ -6,7 +6,7 @@
 -- Install docker  
 
 ## Deployment script
-group_suffix=V7  
+group_suffix=V02  
 
 targetlocation=centralus  
 jenkinsusername=azureuser  
