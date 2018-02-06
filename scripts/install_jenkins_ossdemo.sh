@@ -19,9 +19,8 @@ Arguments
   --cloud_agents|-ca                  : The type of the cloud agents: aci, vm or no.
   --resource_group|-rg                : the resource group name.
   --location|-lo                      : the resource group location.
-  --group_suffix|-gs                  : the group suffix.
   --acr_username|-au                  : the acr user name.
-  --acr_password|-ap                  : the acr password.
+  --acr_password|-ap  				  : the acr password.
 EOF
 }
 
@@ -124,10 +123,6 @@ do
       location="$1"
       shift
       ;;
-    --group_suffix|-gs)
-      group_suffix="$1"
-      shift
-      ;;
     --acr_username|-au)
       acr_username="$1"
       shift
@@ -214,6 +209,8 @@ EOF
 )
 
 jenkins_agent_port="<slaveAgentPort>5378</slaveAgentPort>"
+
+jenkins_num_executors="<numExecutors>0</numExecutors>"
 
 nginx_reverse_proxy_conf=$(cat <<EOF
 server {
@@ -312,6 +309,11 @@ echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/nul
 #Open a fixed port for JNLP
 inter_jenkins_config=$(sed -zr -e"s|<slaveAgentPort.*</slaveAgentPort>|{slave-agent-port}|" /var/lib/jenkins/config.xml)
 final_jenkins_config=${inter_jenkins_config//'{slave-agent-port}'/${jenkins_agent_port}}
+echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
+
+#Update num of Executors
+inter_jenkins_config=$(sed -zr -e"s|<numExecutors.*</numExecutors>|{number-Executors}|" /var/lib/jenkins/config.xml)
+final_jenkins_config=${inter_jenkins_config//'{number-Executors}'/${jenkins_num_executors}}
 echo "${final_jenkins_config}" | sudo tee /var/lib/jenkins/config.xml > /dev/null
 
 #restart jenkins
@@ -436,9 +438,9 @@ EOF
 
 aks_agent_conf=$(cat <<EOF
   <clouds>
-    <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.4.1">
-      <name>kubernetes</name>
-      <resourceGroup>OssDemoJenkinsAgents${group_suffix}</resourceGroup>
+    <com.microsoft.jenkins.containeragents.KubernetesCloud plugin="azure-container-agents@0.3.0">
+      <name>aks</name>
+      <resourceGroup>${resource_group}</resourceGroup>
       <serviceName>jenkinsaks | AKS</serviceName>
       <namespace>default</namespace>
       <acsCredentialsId></acsCredentialsId>
@@ -446,13 +448,12 @@ aks_agent_conf=$(cat <<EOF
       <startupTimeout>10</startupTimeout>
       <templates>
         <com.microsoft.jenkins.containeragents.PodTemplate>
-          <name></name>
+          <name>jnlp</name>
           <image>microsoft/java-on-azure-jenkins-slave:0.1</image>
           <command></command>
-          <args>-url ${rootUrl} ${secret} ${nodeName}</args>
-          <label></label>
+          <args>-url \${rootUrl} \${secret} \${nodeName}</args>
+          <label>jnlp</label>
           <rootFs>/home/jenkins</rootFs>
-          <launchMethodType>jnlp</launchMethodType>
           <retentionStrategy class="com.microsoft.jenkins.containeragents.strategy.ContainerOnceRetentionStrategy">
             <idleMinutes>10</idleMinutes>
           </retentionStrategy>
@@ -517,6 +518,78 @@ fi
 
 run_util_script "scripts/run-cli-command.sh" -c "reload-configuration"
 
+#add job
+bikesharing360job=$(cat <<EOF
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.17">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>git_repo</name>
+          <description>Git repro</description>
+          <defaultValue>https://github.com/xiangyan99/bikesharing360node</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>docker_repository</name>
+          <description>The docker repository</description>
+          <defaultValue>bikesharing360</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>registry_url</name>
+          <description>Container Registry URL</description>
+          <defaultValue>${acr_username}.azurecr.io</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <hudson.triggers.SCMTrigger>
+          <spec>* * * * *</spec>
+          <ignorePostCommitHooks>false</ignorePostCommitHooks>
+        </hudson.triggers.SCMTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.43">
+    <script>node {
+    def built_img = '';
+    stage('Checkout git repo') {
+      git branch: 'master', url: params.git_repo
+    }
+    stage('Build and push Docker image') {
+      sh(script: "docker login \${registry_url} -u ${acr_username} -p ${acr_password}", returnStdout: true)
+      sh(script: "docker build -t \${registry_url}/\${docker_repository}:\${BUILD_NUMBER} .", returnStdout: true)
+      sh(script: "docker push \${registry_url}/\${docker_repository}:\${BUILD_NUMBER}", returnStdout: true)
+    }
+    stage('Unit Tests') {
+      sh 'echo test'
+    }
+    stage('Browser Tests'){
+        parallel(
+            "Edge":{sh 'echo test'},
+            "Firefox":{sh 'echo test'},
+            "Chrome":{sh 'echo test'}
+            )
+    }
+    stage('Deploy into k8s') {
+      sh(script: "kubectl set image deployment/bikesharing360 bikesharing360=\${registry_url}/\${docker_repository}:\${BUILD_NUMBER} --kubeconfig /var/lib/jenkins/.kube/config", returnStdout: true)
+    }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
+EOF
+)
+
+echo "${bikesharing360job}" > /var/lib/jenkins/bikesharing360job.xml
+run_util_script "scripts/run-cli-command.sh" -c "create-job BikeSharing360 " -cif /var/lib/jenkins/bikesharing360job.xml
+rm bikesharing360job.xml
 
 #install nginx
 sudo apt-get install nginx --yes
