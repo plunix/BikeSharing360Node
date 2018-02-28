@@ -10,7 +10,7 @@ app.engine('.html', require('ejs').__express);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 app.use(express.static(path.join(__dirname,'public')));
-
+ 
 var items = [
 	"Sign In",
 	"How it Works",
