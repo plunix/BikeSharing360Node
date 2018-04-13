@@ -7,15 +7,15 @@
 
 ## Deployment script
 1. login your Azure CLI, and set your subscription id
-    '''bash
+    ```bash
     az login
     az account set -s <your-subscription-id>
-    '''
+    ```
 
 1. Set group_suffix value
-    '''bash
+    ```bash
     group_suffix=V02  
-    '''
+    ```
 
 targetlocation=centralus  
 jenkinsusername=azureuser  
