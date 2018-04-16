@@ -1,4 +1,5 @@
 # BikeSharing360Node
+    This is a nodejs application which reuses the UI of [Bikesharing360](https://github.com/Microsoft/BikeSharing360_Websites). 
 
 ## Prerequisites
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)  
