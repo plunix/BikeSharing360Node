@@ -1,7 +1,7 @@
 # BikeSharing360Node  
    This demo sets up Jenkins CICD pipeline in Azure. It provisions a Jenkins VM, An Azure container registry and two Azure AKS clusters. One is used as Jenkins build slaves and the other is used to deploy the nodejs application. When a commit is checked into the source repo, a Jenkins build job will be triggered. It builds a new docker image, pushs the image into the Azure container registry and deploys the image into AKS cluster.
-   This is the workflow:
-   ![Resource List](img/workflow.png)
+   This is the workflow:  
+   ![Resource List](workflow.png)
 
 ## Prerequisites
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)  
