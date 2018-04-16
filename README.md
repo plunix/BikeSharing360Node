@@ -1,9 +1,9 @@
 # BikeSharing360Node
 
 ## Prerequisites
--- Install kubectl  
--- Install Azure cli  
--- Install docker  
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)  
+* [Azure cli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest)  
+* [Install docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/)  
 
 ## Deployment script
 1. login your Azure CLI, and set your subscription id
