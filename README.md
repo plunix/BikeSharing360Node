@@ -69,11 +69,11 @@
 1. deploy application
     ```bash
     cat k8s.yaml | sed -e "s/YourACRName/${acr_username}/g" | kubectl create -f -  
-    az aks get-credentials --resource-group ${ossdemoaks_group} --name aks --admin --file aksconfig  
     ```
 
 1. provision Jenkins slave cluster
     ```bash
+    az aks get-credentials --resource-group ${ossdemoaks_group} --name aks --admin --file aksconfig  
     rm ~/.kube/config  
     az aks get-credentials --resource-group ${ossdemo_group} --name jenkinsaks --admin  
     kubectl create secret generic config --from-file=config=aksconfig  
