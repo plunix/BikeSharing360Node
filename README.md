@@ -18,7 +18,7 @@
 
 1. set group_suffix value
     ```bash
-    group_suffix=V02  
+    group_suffix=$((RANDOM % 100000))  
     ```
 1. set target location, jenkins user name and jenkins password
     ```bash
